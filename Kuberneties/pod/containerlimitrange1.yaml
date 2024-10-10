@@ -1,0 +1,13 @@
+limit range on container 
+https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/memory-default-namespace/
+
+follow the document as full 
+
+
+kb=1000bit  kib=1024bit
+mb=1000kb   mib=1024kb
+gb=1000mb   gib=1024mb
+
+#CPU
+1 core cpu   1000 milicore
+4 core   4000m

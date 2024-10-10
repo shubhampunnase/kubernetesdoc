@@ -1,0 +1,41 @@
+Resource quotas
+
+kb=1000bit  kib=1024bit
+mb=1000kb   mib=1024kb
+gb=1000mb   gib=1024mb
+
+#Resouce quota is always apply on Namespace
+
+#kubectl get namesapce
+create namesapce 
+#kubectl create namesapce project-1
+
+check if any quota on namesapce
+#kubectl -n project-1 get quota
+
+to set Quota on namespace we can create a file 
+quota.yaml
+
+apiversion: v1
+kind: ResourceQuota
+metadata:
+   name: project-1-quota
+   namesapce: project-1
+spec:
+  hard:
+    pods: "2"
+    configmaps: "10"
+    secrets: "10"
+    services: "10"
+    persistentvolumeclaim: "50"
+#more deatils https://kubernetes.io/docs/concepts/policy/resource-quotas/
+
+apply the file
+#kubectl -n project-1 apply -f quota.yaml
+
+check 
+#kubectl -n project-1 describe quota
+
+now cretae 2 pod as limit it will crealet 
+and if we will create more then 2 pods it will be in pending sage in this stage replcai-set and deployment will creted but pod is in pending
+

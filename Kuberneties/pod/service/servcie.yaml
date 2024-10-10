@@ -1,0 +1,250 @@
+flow is look like 
+1> servcie 
+2> deployment 
+3> replicaset in deployment
+4> pods
+
+#Types of servcie 
+
+1> ClusterIP   2> Nodeport   3> LoadBalancer
+
+1> ClusterIp 
+# we used only when we need to communicate internally 
+
+2> Nodeport
+# if i want to access pods form outside then we need to set service type should be nodeport
+# when we used service type is node port in backend one rendome port will assgin with cluster ips and one clusterIp is also created
+# like we hve 192.168.20.11:3333 so randome port will assign to ours cluster ips
+
+3> LoadBalancer
+ # if we want to acess pod without port so we can use servcei type loadbalancer 
+ we we used servcie type is loadbalancer
+ in backer all 3 will create # 1:-loadbalancer 2:-nodeport 3:-clusterIP
+why its happed #because it will add nodeport and ip in loadbalancer
+
+# if we are in on primises so kubernetes provide {metalLB} micro service 
+#or F5 Loadbalancer on primises
+#if we are in cloud so no worries aws or azure or gcp will create LB
+
+
+1> Cluster Ip examiple
+
+#web-deployment.yaml file 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+  labels:
+    app: web-server
+spec:
+  replicas: 1
+  strategy:
+    type: recreate #optioanl 
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.1
+        ports:
+        - containerPort: 80
+
+#db-service.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-server
+  labels:
+    app: db-server
+spec:
+  replicas: 1
+  strategy:
+    type: recreate
+  selector:
+    matchLabels:
+      app: db-server
+  template:
+    metadata:
+      labels:
+        app: db-server
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.1
+        ports:
+        - containerPort: 80  
+
+
+# Create servcie using command line
+
+kubectl expose deployment db-server --type=ClusterIp  --port 80 --target-port=80 #{--target-port is backed port}
+
+# Create servcei using yaml file
+vim web-service.yaml
+apiVersion: v1 
+kind: service
+metadata: 
+  name: my-service
+spec:
+  selector:
+    app: web-server #{web-depployment lable} ued lable of the deployment taht you need to intigare
+  ports:
+    - protocol: TCP
+      port: 80  #{frontend-port}
+      targetPort: 80 #{back-end port}
+
+
+#kubectl apply -f web-servcei.yaml
+More deatils 
+#kubectl describe servcie my-service
+
+Delete
+#kubectl delete servcie db-server && {kubectl delete svc db-server}
+#kubectl delete servcie web-server
+
+#kubectl delete -f db-service.yaml
+#kubectl delete -f web-servcie.yaml
+
+in Kubernetes by deafult servcie is running called 
+# servcie/kubernetes :- ClusterIp type
+All componet api, seduler, conatoller ,etcd DB all are communicate throug this service 
+
+
+
+
+2> Nodeport
+#web-deployment.yaml file  {samefile as clusterip }
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+  labels:
+    app: web-server
+spec:
+  replicas: 2
+  strategy:
+    type: recreate #optioanl 
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.1
+        ports:
+        - containerPort: 80
+
+#kubectl apply -f web-deployment.yaml
+
+Create a service of clusterip 
+# kubectl expose deployment web-server --type=ClusterIP --port=80 {bydefault it will take 80 port}
+# kubectl delete service web-server 
+
+create service of NodePosrt
+# kubectl expose deployment web-server --type=NodePort  {in backed Cluster Ip ia aslo created}
+# kubectl get all -o wide {check}
+
+you will able to see one port with your node ip and also cluster ip is created
+# form out side you will hit the nodeIp with port number
+more deatils 
+#kubectl describe servcie web-server
+now you can check your browser with spacific IP and port number you will able to see your pods apllication 
+
+
+
+3> LoadBalancer
+#In backend clusterIp,nodeport and loadbalancer will create
+#if we are in cloud like AWS,Azure,Gcp it will create LB and LB Ip will accociate with nodeport
+if your in onprimisies kubernetes will provide one LB name matelLB{in this you need to mation one pool of public ip}
+
+#web-server.yaml {same file as nodeport}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+  labels:
+    app: web-server
+spec:
+  replicas: 2
+  strategy: 
+    type: Recreate 
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+  spec:
+    containers:
+    -  name: nginx
+       image: nginx:1.7.1
+       ports:
+       -  conatinerPort: 80
+
+#kubectl apply -f web-server.yaml
+#kubectl expose deployment web-server --type=LabdBalancer
+In this case external ip will be in pending stage because we donat have public ip 
+
+setup metallb loadbalancer surech in google 
+https://metallb.universe.tf/installation/
+go in to Installation by manifest
+
+#vim metallb.yaml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.10.0/24 #{give the address pool as your isp given ckeck usung ifconfig}
+  - 192.168.9.1-192.168.9.5
+  - fc00:f853:0ccd:e799::/124
+
+#kubectl apply -f metallb.yaml
+#kubectl get all {you will able to see your public ip and then try to hit the browser yopu will able to see your application on browser} 
+
+now try in db-server 
+db-server.yaml #{same file as db-server}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-server
+  labels:
+    app: db-server
+spec:
+  replicas: 1
+  strategy:
+    type: recreate
+  selector:
+    matchLabels:
+      app: db-server
+  template:
+    metadata:
+      labels:
+        app: db-server
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.1
+        ports:
+        - containerPort: 80  
+
+#kubectl apply -f db-server.yaml
+#kubectl expose deployment db-server --type=LoadBalancer 
+now this time it will auto take public ip form that we have assgin in metallb-Ip
+
+check in deatils 
+#kubectl get ns
+#kubectl -n metallb-system get pod

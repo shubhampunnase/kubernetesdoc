@@ -1,0 +1,97 @@
+init containers: ## prirequisite task comaplete in #pod first coantiner is init container and delete also initi coantiner
+those container how will create before main pod and perform some task and its will delete automatic before main container strategy
+
+2 tairs app like :- one db-server and second web-server
+
+More detils 
+https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+
+#initcontainer.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app.kubernetes.io/name: MyApp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox:1.28
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers:
+  - name: init-myservice
+    image: busybox:1.28
+    command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+  - name: init-mydb
+    image: busybox:1.28
+    command: ['sh', '-c', "until nslookup mydb.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mydb; sleep 2; done"]
+
+#kubectl apply -f initcontainer.yaml
+#jubectl describe pod myapp-container {for more deatils}
+
+check logs
+#kubectl logs myapp-pod -c init-myservce
+#lubectl logs myapp-pod -c init-db
+
+first one is pending starge this will not allow to create any pod 
+in this code its looking for servce
+#service.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9376
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mydb
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9377
+
+#kubectl apply -f service.yaml
+
+one he found the service init-conatiner will auto terminted  
+aother examiple
+
+#vim initexample.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-demo
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: workdir
+      mountPath: /usr/share/nginx/html
+  # These containers are run during pod initialization
+  initContainers:
+  - name: install
+    image: busybox:1.28
+    command:
+    - wget
+    - "-O"
+    - "/work-dir/index.html"
+    - http://info.cern.ch
+    volumeMounts:
+    - name: workdir
+      mountPath: "/work-dir"
+  dnsPolicy: Default
+  volumes:
+  - name: workdir
+    emptyDir: {}
+
+#kubectl apply -f initexample.yaml
+#kubectl describe pod init-demo

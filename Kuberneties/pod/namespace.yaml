@@ -1,0 +1,49 @@
+#bacically its isolated cluster with diffrent teams
+default namespace
+#kubectl get namespace && kubectl get ns
+
+#kubectl -n kube-system get pods
+
+Create namespace
+#kubectl create namespace project-1
+Create depoloyment
+# kubectl run dev-server --image=nginx #{this will go in to default namespace}
+#kubectl -n project-1 run dev-server --image=nginx
+
+Delete
+#kubectl -n project-1 delete deploymnet dev-server
+
+using namespace.yaml file 
+
+apiVersion: v1 
+kind: Pod
+metadata:
+  name: dev-server
+  namesapce: project-1
+spec:
+  containers:
+    - name: project-1-container
+      image: nginx
+
+#kubectl apply -f namecpace.yaml
+
+we can also defien in command
+#kubectl apply -f namespace.yaml -n project-1
+#kubectl delete -f namespace.yaml -n project-1
+
+change defalut namespace
+#kubectl config get-contexts  {default ns}
+
+#kubectl config set-context project-1 --nmaespace=project-1 --user=kubernetes-admin --cluster=kuberenetas
+
+#kubectl config get-contexts 
+now you can see 2 context 
+you can see the * on currect namespace
+
+chnage the default ns
+# kubectl config use-context project-1
+now bydeafult its go in to project-1
+#kubectl config get-contexts
+
+
+

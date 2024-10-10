@@ -1,0 +1,42 @@
+
+# ones we privision the metallb 
+In master node new namespace will create name matellb-system 
+in this name space one pod will create in pod one virtual-lb will created in this one pool will created
+# matellb is layer2 LB it will access within the network only not accross the network
+like we have pool 192.168.183.101-200
+
+if some one come form diffrent network like 192.168.182.... so it will not access only access with 192.168.183....
+
+command line crete 
+#kubectl get deployment
+#kubectl run web --image=nginx
+#kubectl get deployment {check is done or not}
+#kubetctl get pods
+#kubectl expose deployment web --type Loadbalancer --port 80
+this stage lb will be in pending stage because we donat have any LB
+
+https://metallb.universe.tf/installation/
+go in to Installation by manifest
+
+#kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+matllb create
+
+go in to conafigtaion on the same https://metallb.universe.tf/installation/
+ther you can see 
+Layer2 configration
+BGP configration
+
+#metaillb.yaml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.1.240-192.168.1.250
+
+change Ip as per your convinace
+#kubectl apply -f metallb.yaml
+#kubectl get node {you will able to see the public ip}
+

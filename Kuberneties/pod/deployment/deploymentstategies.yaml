@@ -1,0 +1,86 @@
+There are 3 deployment stategies
+1> Rolling deployment #Default
+
+2>recreate
+
+3> canary Deployment & blue/Green deployment & Red/black deployment
+
+
+1. rolling deployment
+# work like if one deployment created then replica set will created in replca set we have pods
+# if we want to rollout the it will create one replica-set and associate with deployment and then 
+# it will remove one pod form old replica-set and cretae new updated pod in new replica-set
+#it will work like this if we have 1000 pod so it will work same one by one
+# we can alos define a stategie like 50-50 pods one time 10% one time like that
+stategies rolling deployment
+#1> MaxSurge: 2 {it will create 2 pods at the time} also define as in persentage %
+#2> MaxUnavilable {first it will remove pod form old replica-set} also defien in persentage%
+
+2>recreate
+# when we used deployment stategies is recreate the it will not create new replica-set
+#it will recreate pod so will face Downtime
+
+3> canary / blue&gree / red/balck deployment {IMP}
+https://docs.google.com/document/d/1VqvNG69YTt0VsCngLlJr04_gu9hSTY_U9RGHjXUtKUM/edit
+
+Lab will do after service and ingress controller
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spdeployment
+  labels:
+    app: naginx
+spec:
+  replicas: 4
+  strategy:
+    rollingUpdate:
+        MaxSurge: 2 {this mins it will crete 2 pod reday in replca-set } Like 25%
+        maxUnavilable: 0 {no pods in unavilable stategies} also give in % like 0%
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.7.1 {by deafult it will used rolling update directyl update nginx:1.9.1}
+          ports:
+          - containerPort: 80
+      
+ 
+2> recreate
+# kubectl explain deployment --recursive | less
+{ when it will used 100% down time first it will remove all pods from replca-set}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spdeployment
+  labels:
+    app: naginx
+spec:
+  replicas: 4
+  strategy:
+    type: recreate
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.7.1 {by deafult it will used rolling update directyl update nginx:1.9.1}
+          ports:
+          - containerPort: 80
+
+
+
+
+

@@ -1,0 +1,35 @@
+# Create pod using command
+kubectl run web-server --image=nginx
+kubectl get pods
+
+#check conatiner is in which pod
+kubectl get pod -o wide
+
+#check Deatisl of pod
+kubectl describe pod web-server
+
+# Delete pod
+kubectl delete pod web-server
+kubectl delete pod --all # delete all pod
+
+## by defalut in master node we can't craete a pod dure to (Taints) for check 
+kubectl get nodes
+kubectl describe node master # FIND THE WORD Taints
+
+# how to remove taints find in google 
+kubectl taint nodes --all node-role.kubernetes.io/master-
+ 
+# to create pods using file method 
+kubectl explain pod
+
+# how to into container if onaly one container in pod
+kubectl exec -it spserver /bin/bash
+
+#if multiple container in pod 
+kubectl exec -it spserver -c conatiner-name /bin/bash
+
+#directly go in to container
+kubectl run -i -t dev-server --image=nginx
+
+# Get all command form Google
+kubernetes command cheat sheet

@@ -1,0 +1,48 @@
+# create 2 pods
+kubectl run dev --image=nginx
+kubectl run prod --image=nginx
+
+# remove default label
+kubectl lable pod dev run-
+kubectl label pod prod run-
+
+# assgin new label 
+kubectl label pod dev team=dev
+kubectl label pod prod team=prod
+
+#create replica set
+kubectl explain rs
+
+apiVersion: v1
+kind: ReplicaSet
+metadata:
+  name: cloudknowledges
+spec:
+  replicas: 3
+  selector:
+    matchExpressions:
+      - key: team
+        operator: In  #eqiaire those container how have lable set values varibale
+        values:
+          - dev
+          - prod
+          - test
+      - key: team 
+        operator: NotIn
+        values:
+          - test # if the same value In and NotIn proirits is NotIN
+      
+  template:
+    metadata:
+      name: dev
+      labels:
+        team: dev
+
+    spec: 
+     containers:
+       - name: spcontainer
+         image: naginx:1.9.1
+         ports:
+         - containerPort:  80
+
+# kubectl apply -f rs.yaml

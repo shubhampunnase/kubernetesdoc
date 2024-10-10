@@ -1,0 +1,77 @@
+# Kubernetes Multi-Container POD
+
+In pod mini 2 container and max upto {like infinite}
+in pod pause container it will store pod IP and it will create one name space and accoicate with pod
+when actual container will run IP and namespace is accociate with pause conatiner 
+if you want ro see in deatils #kubectl get pod -o wide {you will able to see pause conatiner as well beacuse pause coantiner is hide}
+
+#multicontainerpod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: spcontainer
+spec:
+  containers:
+    - name: 1st
+      image: nginx
+    
+    - name: 2nd
+      image: nginx
+
+There is no proess define in this case #only one container will run 
+#kubectl apply -f multicontainerpod.yaml
+more deatils 
+#kubectl describe pod spcontainer {you can see only one pod is runing}
+
+now try another way 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: spcontainer
+spec:
+  containers:
+    - name: 1st
+      image: nginx
+      args: ["sleep", "3600"]   ##add this line 
+    - name: 2nd
+      image: nginx
+
+#kubectl apply -f multicontainerpod.yaml
+#kubectl describe pod spcontainer 
+
+check the pod is which container go in that node and ru ##docker ps -a {here you can see pause name container}
+how to go in container 
+#kubectl exec -it spcontainer /bin/bash {by deafult firts container}
+#kubectl exec -it spconatiner -c 2nd-container name /bin/bash 
+
+Multi conatiner pod
+https://linchpiner.github.io/k8s-multi-container-pods.html
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mc1
+spec:
+  volumes:
+  - name: html
+    emptyDir: {}
+  containers:
+  - name: 1st
+    image: nginx
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+  - name: 2nd
+    image: debian
+    volumeMounts:
+    - name: html
+      mountPath: /html
+    command: ["/bin/sh", "-c"]
+    args:
+      - while true; do
+          date >> /html/index.html;
+          sleep 1;
+        done
+
+#Apply this file

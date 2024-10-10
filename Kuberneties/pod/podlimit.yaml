@@ -1,0 +1,22 @@
+By default we can create 110 pod in one #node it can be anything 
+we can incress or decress the pod size in any node 
+
+remove taint form master {not naccary} if you have only 2 nodes 1 master and 1 worker then do this
+#kubectl taint nodes --all node-role.kubernetes.io/master-
+
+#kubectl describe node master 
+you can see in pod will create 110 pods in deatils
+#kubectl describe node worker
+
+#for change limit 
+# cd /var/lib/kubelet/
+#vim config.yaml
+search for maxPods 57line 72%
+incress limit as mush you want 
+maxPods: 1000000
+# systemctl restart kubelet.service
+node will be down form few min
+#kubectl get nodes
+#kubectl describe node worker
+
+If you want to any node go in to that server and chnge the same it will reflect 

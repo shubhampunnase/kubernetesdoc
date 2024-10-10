@@ -1,0 +1,31 @@
+Taint 
+# mainly used for no further pod or any takes will take by thet node
+# used ffor patch update one by one
+# used to block any node form cluster taht is alreday full
+# bydeafult kubernetes masternode having taint 
+
+how to check taint
+#kubectl get nodes
+#kubectl describe node master {here you can see taint} 
+or anotherway
+#kubectl decsribe node master | grep -i taint
+this command you will get the full name of master-node
+for remove taint 
+#kubectl taint node --all node-role.kubernetes.io/master-
+check again you will find no taint 
+#kubectl describe node master | grep -i taint
+
+Apply taint on node01
+#kubectl describe node node01
+
+#kubectl taint nodes node01 key=value:NoSchedule
+we can ued key=value:NoSchedule  #{key=value:NoExecute}  both will work same
+check 
+#kubectl describe node node01 | grep -i taint
+
+Remove taint 
+#kubectl taint nodes node01 key:NoSchedule-
+we can ued key:NoSchedule-  #{key:NoExecute-}  both will work same
+
+If all the nodes are in Taint 
+#then deploymnet will be pending satge

@@ -1,0 +1,78 @@
+# kubectl explain deployment or else get the code form google
+
+apiVersion: v1
+kind: Deployment 
+metadata:
+  name: spdeployment
+  lables:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      lables:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: ngainx:1.7.1
+        ports:
+        - containers: 80     
+
+# kubectl apply -f deployment.yaml
+first it will create deployment then ReplicaSet , pods {this is the flow}
+# If you want to scal down or up just need to change
+replicas: 3 (scal here)
+
+# kubectl rollout history deployement.apps/spdeployment
+ for maintian recored 
+# kubectl apply -f deployment.yaml --record=true
+
+check deployment app vesrion 
+#kubectl describe deployment.app/spdeployment
+
+1'st>>
+ way to rollout
+rollout jest need to change image form deployment.yaml
+  image: ngainx:1.7.1 
+  image: ngainx:1.9.1  #like this
+
+# kubectl apply -f deployment.yaml --record=true
+
+
+2nd 
+ way to rollout {no need to change in yaml file just used this command}
+# kubectl set image deployment.apps/spdeployment nginx=nginx:1.16.1 --recored=true
+
+3rd way 
+# kubectl edit deployment.apps/cloudknowledges {name of deployment}
+ones its open find the image section and then edit
+
+# If you will used wrong image it will crete one pod only 
+so it will always create one pod if it is sucessfull then only it will create further pods
+
+#rollback
+first run history 
+# kubectl rollout history deployment.app/spdeployment
+
+check spacific rollout history
+# kubectl rollout history deployment.app/spdeployment --revision=4 {any number that you wnat to check}
+
+rollout 
+# kubectl rollout undo deployment.app/spdeployment {it will rollout privious vesrion}
+
+and want to rollout spacific vesrion 
+# kubectl rollout undo deployment.app/spdepoyment --to-revision=4
+
+
+pause rollout in indsty because its veary simple to everyone rollout
+# kubectl rollout pause deployment.app/spdepoyment 
+
+start again or unpause
+# kubectl rollout resume deployment.app/spdeployment
+
+
+
